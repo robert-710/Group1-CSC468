@@ -1,4 +1,4 @@
-l# This file was generated with the script ./update-dashboard-yaml.sh.
+# This file was generated with the script ./update-dashboard-yaml.sh.
 #
 ---
 apiVersion: v1
