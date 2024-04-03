@@ -5,15 +5,15 @@
       <h1>Scenic Navigation App</h1>
     </header>
     <main>
-      <MapComponent />
-      <RouteSuggestionsComponent />
+      <MapComponent ref="mapComponent"/>
+      <RouteSuggestionsComponent @directionsCalculated="handleDirectionsCalculated"/>
     </main>
   </div>
 </template>
 
 <script>
-import MapComponent from './components/MapComponent.vue'
-import RouteSuggestionsComponent from './components/RouteSuggestionsComponent.vue'
+import MapComponent from './components/MapComponent.vue';
+import RouteSuggestionsComponent from './components/RouteSuggestionsComponent.vue';
 
 export default {
   name: 'App',
@@ -25,8 +25,13 @@ export default {
   components: {
     MapComponent,
     RouteSuggestionsComponent
-  }
-}
+  },
+   methods: {
+    handleDirectionsCalculated(directions) {
+      this.$refs.mapComponent.renderDirections(directions);
+    },
+  },
+};
 </script>
 
 <style>
