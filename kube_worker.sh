@@ -24,3 +24,9 @@ systemctl enable rke2-agent.service
 mkdir -p /etc/rancher/rke2/
 cp /opt/keys/config.yaml /etc/rancher/rke2/config.yaml
 systemctl start rke2-agent.service
+
+while [ ! -d /opt/keys/certs.d ]; do
+  sleep 10
+done
+
+cp -R /opt/keys/certs.d /etc/docker
