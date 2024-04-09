@@ -9,8 +9,8 @@ prompt = no
 countryName = US
 stateOrProvinceName = PA
 localityName = West Chester
-organizationName = Self-signed certificate
-commonName = 120.0.0.1: Self-signed certificate
+organizationName = WCU Computer Science
+commonName = 120.0.0.1: WCU Computer Science
 
 [req_ext]
 subjectAltName = @alt_names
