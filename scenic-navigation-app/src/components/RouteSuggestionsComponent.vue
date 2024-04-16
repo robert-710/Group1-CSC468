@@ -8,24 +8,37 @@
 </template>
 
 <script>
+/* global google */
 export default {
-  name: 'RouteSuggestionsComponent'
-  data() {
-    return {
-      directionsService: null,
-    };
+  name: 'RouteSuggestionsComponent',
+  props: {
+    directionsService: {
+      type: Object,
+      required: true,
+    }
   },
   mounted() {
-    this.directionsService = new google.maps.DirectionsService();
-    const options = {
-      types: ['(cities)'],
-    };
-    const inputStart = document.getElementById('start');
-    const autocompleteStart = new google.maps.places.Autocomplete(inputStart, options);
-    const inputEnd = document.getElementById('end');
-    const autocompleteEnd = new google.maps.places.Autocomplete(inputEnd, options);
+    // Ensure Google API has loaded
+    if (window.google) {
+      this.initializeAutocomplete();
+    } else {
+      window.addEventListener('googleMapsApiLoaded', this.initializeAutocomplete);
+    }
   },
   methods: {
+    initializeAutocomplete() {
+      const options = {
+        types: ['(cities)'],
+      };
+      const inputStart = document.getElementById('start');
+      if (inputStart) {
+        new google.maps.places.Autocomplete(inputStart, options);
+      }
+      const inputEnd = document.getElementById('end');
+      if (inputEnd) {
+        new google.maps.places.Autocomplete(inputEnd, options);
+      }
+    },
     renderTurnByTurnDirections(steps) {
       const directionsPanel = document.getElementById('directions-panel');
       directionsPanel.innerHTML = '';
@@ -39,41 +52,53 @@ export default {
       });
     },
     calculateAndDisplayRoute() {
-      const start = document.getElementById('start').value;
-      const end = document.getElementById('end').value;
+      const startInput = document.getElementById('start');
+      const endInput = document.getElementById('end');
+      const start = startInput ? startInput.value : '';
+      const end = endInput ? endInput.value : '';
       if (!start || !end) {
         alert('Please enter both origin and destination!');
         return;
       }
-      this.directionsService
-        .route({
-          origin: start,
-          destination: end,
-          travelMode: google.maps.TravelMode.DRIVING,
-          unitSystem: google.maps.UnitSystem.IMPERIAL,
-        })
-        .then((response) => {
-          this.$emit('directionsCalculated', response);
-          this.renderTurnByTurnDirections(response.routes[0].legs[0].steps);
-        })
-        .catch((e) => {
-          console.error('Directions request failed:', e);
-          alert('Directions request failed. Please check the console log for more details.');
-        });
+
+      if (this.directionsService) {
+        this.directionsService
+          .route({
+            origin: start,
+            destination: end,
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.IMPERIAL,
+          })
+          .then((response) => {
+            this.$emit('directionsCalculated', response);
+            this.renderTurnByTurnDirections(response.routes[0].legs[0].steps);
+          })
+          .catch((e) => {
+            console.error('Directions request failed:', e);
+            alert('Directions request failed. Please check the console log for more details.');
+          });
+      } else {
+        console.warn('Google Maps API key or directionsService is missing.')
+      }
     },
   },
 };
 </script>
 
 <style>
-#directions-panel {
-  height: 400px;
-  width: 35%;
-  float: right;
-  overflow-y: auto;
-  border: 2px solid #ccc;
-  margin: 10px;
+.placeholder {
+  margin: 20px;
   padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
   text-align: center;
+}
+
+#directions-panel {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  overflow-y: auto;  /* Add scroll for longer directions */
+  max-height: 300px; /* Adjust the max height as needed */
 }
 </style>

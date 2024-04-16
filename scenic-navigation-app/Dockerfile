@@ -11,5 +11,10 @@ FROM node:lts-alpine
 WORKDIR /scenic-navigation-app
 COPY --from=build-stage /app/dist /scenic-navigation-app
 RUN npm install -g http-server
+
 EXPOSE 8080
+
+# Inject environment variable - This reads the API key from the environment
+ENV VUE_APP_GOOGLE_MAPS_API_KEY $VUE_APP_GOOGLE_MAPS_API_KEY
+
 CMD ["http-server", "/scenic-navigation-app", "-p", "8080"]
