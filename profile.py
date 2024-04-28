@@ -67,6 +67,10 @@ for i in range(num_nodes):
     node.addService(pg.Execute(shell="sh", command="sudo bash /local/repository/registry/setup_registry.sh"))
     # install and deploy Jenkins
     node.addService(pg.Execute(shell="sh", command="sudo bash /local/repository/launch_dashboard.sh"))
+    # install Apache2
+    node.addService(pg.Execute(shell="/bin/sh", command="sudo apt update"))
+    node.addService(pg.Execute(shell="/bin/sh", command="sudo apt install -y apache2"))
+    node.addService(pg.Execute(shell="/bin/sh", command="sudo systemctl enable apache2"))    
   else:
     node.addService(pg.Execute(shell="sh", command="sudo bash /local/repository/kube_worker.sh"))
     
