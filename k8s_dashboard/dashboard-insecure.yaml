@@ -212,7 +212,7 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 443
+    port: 8443
     targetPort: http
   selector:
     app.kubernetes.io/component: kubernetes-dashboard
