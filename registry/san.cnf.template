@@ -19,4 +19,4 @@ subjectAltName = @alt_names
 subjectAltName = @alt_names
 
 [alt_names]
-IP.1 = IPADDR
+IP.1 = IPADDR:8443
