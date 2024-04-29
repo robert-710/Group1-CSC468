@@ -4,12 +4,12 @@ services:
   registry:
     image: registry:2.7
     ports:
-    - "443:443"
+    - "8443:8443"
     environment:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: Registry
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
-      REGISTRY_HTTP_ADDR: 0.0.0.0:443
+      REGISTRY_HTTP_ADDR: 0.0.0.0:8443
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
       REGISTRY_HTTP_TLS_KEY: /certs/domain.key
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /image
