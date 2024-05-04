@@ -1,17 +1,113 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"/>
+    <title>My Google Maps</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+      #directions-panel {
+        height: 400px; 
+        width: 35%; 
+        float: right;
+        overflow-y: auto; /* Scrollable if needed */
+        margin: 10px; 
+        padding: 10px;
+        border: 1px solid #ccc;
+      }
+    </style>
   </head>
   <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
+    <h1>My Google Maps</h1>
+    <input type="text" id="start" placeholder="Enter your origin" />
+    <input type="text" id="end" placeholder="Enter your destination" />
+    <button type="button" onclick="calculateAndDisplayRoute()">
+      Get Directions
+    </button>
+  </div>
+  <div id="map"></div>
+  <div id="directions-panel"></div> 
+    <script>
+      let map; // Holds the map object
+      let directionsService;
+      let directionsRenderer;
+
+      function initMap() {
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer();
+
+        const mapOptions = {
+        zoom: 8,
+        center: { lat: 39.9607, lng: -75.6055 }, // Default center
+        };
+        
+       map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      directionsRenderer.setMap(map);
+      
+        // Autocomplete Setup
+      const options = {
+        types: ['(cities)'],  
+     };
+      const inputStart = document.getElementById("start");
+      const autocompleteStart = new google.maps.places.Autocomplete(inputStart, options);
+
+      const inputEnd = document.getElementById("end");
+      const autocompleteEnd = new google.maps.places.Autocomplete(inputEnd, options);
+    }
+
+
+      function calculateAndDisplayRoute() {
+        const start = document.getElementById("start").value;
+        const end = document.getElementById("end").value;
+        if (!start || !end) {
+        alert("Please enter both origin and destination!");
+        return;
+        }
+
+        directionsService
+        .route({
+          origin: start,
+          destination: end,
+          travelMode: google.maps.TravelMode.DRIVING, 
+          unitSystem: google.maps.UnitSystem.IMPERIAL, 
+        })
+        .then((response) => {
+          directionsRenderer.setDirections(response);
+          renderTurnByTurnDirections(response.routes[0].legs[0].steps); 
+        })
+        .catch((e) => {
+            // Handle more specific errors
+            console.error("Directions request failed:", e); 
+            alert("Directions request failed. Please check the console log for more details.");
+          });
+      }
+      
+      function renderTurnByTurnDirections(steps) {
+        const directionsPanel = document.getElementById("directions-panel");
+        directionsPanel.innerHTML = ""; 
+
+        steps.forEach((step) => {
+        const instruction = document.createElement("div");
+        instruction.innerHTML = step.instructions;
+        directionsPanel.appendChild(instruction); 
+
+        const distance = document.createElement("div");
+        distance.innerHTML = step.distance.text; 
+        directionsPanel.appendChild(distance); 
+        });
+      }
+      window.initMap = initMap;
+    </script>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCyUvERM7_630MiUUvVIYQVbYJxxN2xSNE&libraries=places,directions&callback=initMap"
+    ></script>
   </body>
 </html>

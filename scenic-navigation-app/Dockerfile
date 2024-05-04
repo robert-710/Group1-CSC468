@@ -11,5 +11,8 @@ FROM node:lts-alpine
 WORKDIR /scenic-navigation-app
 COPY --from=build-stage /app/dist /scenic-navigation-app
 RUN npm install -g http-server
+
 EXPOSE 8080
+
+
 CMD ["http-server", "/scenic-navigation-app", "-p", "8080"]
