@@ -13,8 +13,8 @@
         width: 100%;
       }
       #directions-panel {
-        height: 400px; 
-        width: 35%; 
+        height: 600px; 
+        width: 75%; 
         float: right;
         overflow-y: auto; /* Scrollable if needed */
         margin: 10px; 
@@ -24,10 +24,10 @@
     </style>
   </head>
   <body>
-    <h1>My Google Maps</h1>
+    <h1>Scenic Navigation App</h1>
     <input type="text" id="start" placeholder="Enter your origin" />
     <input type="text" id="end" placeholder="Enter your destination" />
-    <button type="button" onclick="calculateAndDisplayRoute()">
+    <button type="button" onclick="fetchRouteWithScenicPoints()">
       Get Directions
     </button>
   </div>
@@ -62,31 +62,62 @@
     }
 
 
-      function calculateAndDisplayRoute() {
-        const start = document.getElementById("start").value;
-        const end = document.getElementById("end").value;
-        if (!start || !end) {
+    function fetchRouteWithScenicPoints() {
+      const start = document.getElementById("start").value;
+      const end = document.getElementById("end").value;
+      if (!start || !end) {
         alert("Please enter both origin and destination!");
         return;
-        }
-
-        directionsService
-        .route({
-          origin: start,
-          destination: end,
-          travelMode: google.maps.TravelMode.DRIVING, 
-          unitSystem: google.maps.UnitSystem.IMPERIAL, 
-        })
-        .then((response) => {
-          directionsRenderer.setDirections(response);
-          renderTurnByTurnDirections(response.routes[0].legs[0].steps); 
-        })
-        .catch((e) => {
-            // Handle more specific errors
-            console.error("Directions request failed:", e); 
-            alert("Directions request failed. Please check the console log for more details.");
-          });
       }
+
+      // Correct the URL to point to the Flask backend
+      fetch('http://localhost:8080/api/calculate-route', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ start: start, end: end })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        displayRoute(data);
+        renderTurnByTurnDirections(data.routes[0].legs[0].steps);
+      })
+      .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+      });
+    }
+
+    function displayRoute(data) {
+    const route = data.routes[0];  // Assuming you want the first route
+
+    // Decode the polyline
+    const routePath = google.maps.geometry.encoding.decodePath(route.overview_polyline.points);
+
+    // Create a polyline from the route and set it on the map
+    const polyline = new google.maps.Polyline({
+        path: routePath,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+
+    polyline.setMap(map);
+
+    // Adjust the map bounds
+    const bounds = new google.maps.LatLngBounds();
+    routePath.forEach(function(latLng) {
+        bounds.extend(latLng);
+    });
+    map.fitBounds(bounds);
+}
       
       function renderTurnByTurnDirections(steps) {
         const directionsPanel = document.getElementById("directions-panel");
@@ -94,7 +125,7 @@
 
         steps.forEach((step) => {
         const instruction = document.createElement("div");
-        instruction.innerHTML = step.instructions;
+        instruction.innerHTML = step.html_instructions;
         directionsPanel.appendChild(instruction); 
 
         const distance = document.createElement("div");
@@ -107,7 +138,7 @@
     <script
       async
       defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCyUvERM7_630MiUUvVIYQVbYJxxN2xSNE&libraries=places,directions&callback=initMap"
+      src="https://maps.googleapis.com/maps/api/js?key=&libraries=places,directions&callback=initMap"
     ></script>
   </body>
 </html>
